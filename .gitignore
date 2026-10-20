@@ -1,12 +1,12 @@
-# Project exclude paths
-/.gradle/
-/.idea/
-/build/
+# Generated files (root project and editions)
+.gradle/
+.idea/
+.lwjgl/
+build/
 /dist/
-/editions/*/build/
-/run/
-/out/
-/logs/
+run/
+out/
+logs/
 
 bin/
 .classpath
@@ -15,6 +15,22 @@ bin/
 .settings/
 
 .vscode/
+
+# Local logs, crash dumps and editor leftovers
+*.log
+*.hprof
+*.class
+*.tmp
+*.bak
+*.orig
+*.rej
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+__pycache__/
+*.pyc
+*.pyo
 
 # compile-only third-party jars, drop them in yourself (see README)
 /libs/
@@ -29,4 +45,3 @@ bin/
 /BIG-ITEMS-PLAN.md
 /PRE-PUSH-AUDIT.md
 /UPSTREAM-MERGE-PLAN.md
-__pycache__/
