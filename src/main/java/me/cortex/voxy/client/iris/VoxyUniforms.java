@@ -48,6 +48,8 @@ public class VoxyUniforms {
     public static void addUniforms(UniformHolder uniforms) {
         uniforms
                 .uniform1i(PER_FRAME, "vxRenderDistance", ()->Math.round(VoxyConfig.CONFIG.sectionRenderDistance*32))//In chunks
+                .uniform1f(PER_FRAME, "vxNearPlane", ()->getClipPlane(false))
+                .uniform1f(PER_FRAME, "vxFarPlane", ()->getClipPlane(true))
                 // Used by the injected Iris terrain-cutout and shadow shaders. These must be
                 // registered even though the opaque LOD handoff itself uses the stencil pass.
                 .uniform1f(PER_FRAME, "voxyLodBoundaryFadeStart", () -> LodBoundaryFade.getDistances().fadeStart())
@@ -64,6 +66,12 @@ public class VoxyUniforms {
 
     }
 
+    private static float getClipPlane(boolean far) {
+        var holder = (IGetVoxyRenderSystem) Minecraft.getInstance().levelRenderer;
+        var renderer = holder == null ? null : holder.voxy$getRenderSystem();
+        var viewport = renderer == null ? null : renderer.getViewport();
+        return viewport == null ? (far ? 48000.0f : 16.0f) : (far ? viewport.farPlane : viewport.nearPlane);
+    }
 
 
 

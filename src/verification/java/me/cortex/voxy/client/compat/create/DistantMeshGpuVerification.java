@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL45C.*;
 /** 在隐藏窗口中运行实际顶点 shader、索引级别和列车深度回放坐标。 */
 public final class DistantMeshGpuVerification {
     public static void main(String[] args) throws Exception {
+        verifyClipPlaneUniforms();
         if (!glfwInit()) throw new AssertionError("GLFW unavailable");
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -96,6 +97,18 @@ public final class DistantMeshGpuVerification {
         System.out.println("Passed " + checks + " GPU mesh/index/morph/depth-coordinate checks; " + glGetString(GL_RENDERER));
         glfwDestroyWindow(window);
         glfwTerminate();
+    }
+
+    private static void verifyClipPlaneUniforms() {
+        var builder = new net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder.Builder();
+        me.cortex.voxy.client.iris.VoxyUniforms.addUniforms(builder);
+        var inputs = builder.build();
+        for (String name : new String[]{"vxNearPlane", "vxFarPlane"}) {
+            if (inputs.getType(name) != kroppeb.stareval.function.Type.Float) {
+                throw new AssertionError("Missing Voxy shader API 3 float input: " + name);
+            }
+        }
+        System.out.println("Verified Voxy shader API 3 clip-plane uniform registration");
     }
 
     private static void verifyZoomDraws() throws Exception {

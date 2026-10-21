@@ -36,6 +36,8 @@ public abstract class Viewport <A extends Viewport<A>> {
     public int width;
     public int height;
     public int frameId;
+    public float nearPlane = 16.0f;
+    public float farPlane = 48000.0f;
     //frameId of the most recent command-list build. Feeds the SceneUniform slot the visibility
     //raster compares stamps against: with the command-list hold, frameId keeps counting on held
     //frames while the stamps in visibilityData stay at the build that wrote them, so "visible last

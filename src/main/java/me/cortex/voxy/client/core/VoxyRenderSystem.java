@@ -239,7 +239,9 @@ public class VoxyRenderSystem {
         if (this.pipeline.useDynamicFarPlane()) {
             farPlane = (float) ((VoxyConfig.CONFIG.createLodRadius() + 32.0) * Math.sqrt(3.0));
         }
-        var voxyProjection = computeProjectionMat(this.properties, vanillaProjection, farPlane);
+        float nearPlane = getRenderDistance() <= 32.0f ? 8.0f : 16.0f;
+        nearPlane = VoxyClient.disableSodiumChunkRender() ? 0.1f : nearPlane;
+        var voxyProjection = computeProjectionMat(this.properties, vanillaProjection, nearPlane, farPlane);
 
         glGetIntegerv(GL_VIEWPORT, this.viewportDimensions);
 
@@ -259,6 +261,8 @@ public class VoxyRenderSystem {
             return null;
         }
 
+        viewport.nearPlane = nearPlane;
+        viewport.farPlane = farPlane;
         viewport
                 .setVanillaProjection(vanillaProjection)
                 .setProjection(voxyProjection)
@@ -572,15 +576,13 @@ public class VoxyRenderSystem {
         return Minecraft.getInstance().options.getEffectiveRenderDistance() * 16;
     }
 
-    private Matrix4f computeProjectionMat(RenderProperties properties, Matrix4fc base, float farPlane) {
+    private Matrix4f computeProjectionMat(RenderProperties properties, Matrix4fc base, float nearPlane, float farPlane) {
 
         // Preserve projection changes applied by Minecraft, such as view bobbing.
         var rawMCProj = RenderSystem.getProjectionMatrix();
         var extraProjection = rawMCProj.invert(this.projectionScratch).mul(base);
 
-        float near = getRenderDistance() <= 32.0f ? 8.0f : 16.0f;
-        near = VoxyClient.disableSodiumChunkRender() ? 0.1f : near;
-
+        float near = nearPlane;
         float far = farPlane;
 
         // Reverse-Z swaps the near and far mapping.
