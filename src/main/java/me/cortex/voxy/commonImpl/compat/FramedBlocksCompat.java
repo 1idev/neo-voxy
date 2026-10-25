@@ -188,8 +188,8 @@ public final class FramedBlocksCompat {
             if (level == null || !(state.getBlock() instanceof EntityBlock entityBlock)) return null;
             BlockEntity blockEntity = entityBlock.newBlockEntity(BlockPos.ZERO, state);
             if (blockEntity == null || !blockEntity.getClass().getName().startsWith(PACKAGE_PREFIX)) return null;
-            blockEntity.setLevel(level);
             blockEntity.handleUpdateTag(descriptor.getCompound("block_entity").copy(), level.registryAccess());
+            blockEntity.setLevel(level);
             Method method = MODEL_DATA_METHODS.get(blockEntity.getClass()).orElse(null);
             Object result = method == null ? blockEntity.getModelData() : method.invoke(blockEntity, false);
             return result instanceof ModelData modelData ? modelData : null;
