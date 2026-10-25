@@ -1,33 +1,61 @@
-name: manual-artifact
+name: 手动构建
 
-on: [ workflow_dispatch ]
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   build:
+    name: Build ${{ matrix.label }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - edition: neoforge-1.21.1
+            label: 1.21.1 NeoForge
+            java: '21'
+          - edition: client-1.20.1
+            label: 1.20.1 Forge client
+            java: '17'
+          - edition: client-26.1.2
+            label: 26.1.2 NeoForge client
+            java: '25'
 
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
 
-      - name: Setup Java
+      - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 25
+          java-version: ${{ matrix.java }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-provider: basic
-          cache-disabled: true
-          cache-cleanup: always
+          cache-read-only: false
 
-      - name: Gradle build
-        run: ./gradlew build
+      - name: Keep compiler errors visible
+        if: matrix.edition == 'client-26.1.2'
+        shell: bash
+        run: |
+          echo '::remove-matcher owner=javac::'
+          echo "::add-matcher::${GITHUB_WORKSPACE}/.github/javac-errors.json"
+
+      - name: Build ${{ matrix.edition }}
+        env:
+          EDITION: ${{ matrix.edition }}
+        shell: bash
+        run: bash scripts/build.sh "$EDITION"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: voxy-artifacts
-          path: build/libs/*.jar
+          path: dist/*.jar
+          if-no-files-found: error
           archive: false
